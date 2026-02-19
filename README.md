@@ -43,7 +43,7 @@ chmod +x ./publish.sh
 发布后可用一行命令执行：
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/<owner>/<repo>/main/bootstrap.sh | bash
+curl -fsSL https://xiaoxkkk.github.io/pc-setup-bootstrap/bootstrap.sh | bash
 ```
 
 ## 交互分段

@@ -112,7 +112,8 @@ main() {
   echo
   echo "发布完成。"
   echo "一行命令（raw）:"
-  echo "curl -fsSL https://raw.githubusercontent.com/$owner/$repo/main/bootstrap.sh | bash"
+    echo "一行命令（GitHub Pages）:"
+    echo "curl -fsSL https://$owner.github.io/$repo/bootstrap.sh | bash"
   echo
   echo "GitHub Pages（若已开启）:"
   echo "https://$owner.github.io/$repo/"
