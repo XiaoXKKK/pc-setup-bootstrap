@@ -415,6 +415,7 @@ step_install_claude_cli() {
 step_install_claude_settings() {
   local settings_repo="https://github.com/feiskyer/claude-code-settings.git"
   local target_dir="$HOME/.claude"
+  local backup_dir="${target_dir}.bak"
 
   log_info "安装 Claude settings"
 
@@ -423,21 +424,12 @@ step_install_claude_settings() {
     return 1
   fi
 
-  if [[ -d "$target_dir" ]]; then
-    if [[ -d "$target_dir/.git" ]]; then
-      local origin_url
-      origin_url="$(git -C "$target_dir" remote get-url origin 2>/dev/null || true)"
-      if [[ "$origin_url" == *"feiskyer/claude-code-settings"* ]]; then
-        log_info "检测到已存在的 Claude settings，尝试更新..."
-        git -C "$target_dir" pull --ff-only
-        return $?
-      fi
-      log_warn "$target_dir 已存在但不是目标仓库，请手动处理后重试。"
-      return 1
+  if [[ -e "$target_dir" ]]; then
+    if [[ -e "$backup_dir" ]]; then
+      backup_dir="${target_dir}.bak.$(date +%Y%m%d%H%M%S)"
     fi
-
-    log_warn "$target_dir 已存在且不是 git 仓库，请手动处理后重试。"
-    return 1
+    log_warn "检测到已存在的 $target_dir，已备份到 $backup_dir"
+    mv "$target_dir" "$backup_dir" || return 1
   fi
 
   git clone "$settings_repo" "$target_dir"
@@ -567,21 +559,32 @@ step_set_default_shell() {
 }
 
 print_summary() {
+  local -a success_items
+  local -a failure_items
+  local -a skipped_items
   local item
+
+  success_items=("${SUCCESSES[@]-}")
+  failure_items=("${FAILURES[@]-}")
+  skipped_items=("${SKIPPED[@]-}")
+
   printf "\n===== 初始化结果汇总 =====\n"
 
-  printf "\n成功项目 (%d):\n" "${#SUCCESSES[@]}"
-  for item in "${SUCCESSES[@]}"; do
+  printf "\n成功项目 (%d):\n" "${#success_items[@]}"
+  for item in "${success_items[@]}"; do
+    [[ -z "$item" ]] && continue
     printf "  - %s\n" "$item"
   done
 
-  printf "\n失败项目 (%d):\n" "${#FAILURES[@]}"
-  for item in "${FAILURES[@]}"; do
+  printf "\n失败项目 (%d):\n" "${#failure_items[@]}"
+  for item in "${failure_items[@]}"; do
+    [[ -z "$item" ]] && continue
     printf "  - %s\n" "$item"
   done
 
-  printf "\n跳过项目 (%d):\n" "${#SKIPPED[@]}"
-  for item in "${SKIPPED[@]}"; do
+  printf "\n跳过项目 (%d):\n" "${#skipped_items[@]}"
+  for item in "${skipped_items[@]}"; do
+    [[ -z "$item" ]] && continue
     printf "  - %s\n" "$item"
   done
 
